@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.bennyplo.graphics3d.Coordinate;
+import com.bennyplo.graphics3d.Matrices3D;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -39,6 +40,8 @@ public class MyView extends View {
     private Coordinate[] draw_cube_vertices;//the vertices for drawing a 3D cube
 
     private float[] triangle = {100, 100, 200, 200, 200, 200, 100, 200, 100, 200, 100, 100};
+
+    private Matrices3D matrices3D = new Matrices3D();
 
     public MyView(Context context) {
         super(context, null);
@@ -663,6 +666,7 @@ public class MyView extends View {
         return matrix;
     }
 
+    /*
     public Coordinate Transformation(Coordinate vertex, double[] matrix) {//affine transformation with homogeneous coordinates
         //i.e. a vector (vertex) multiply with the transformation matrix
         // vertex - vector in 3D
@@ -685,7 +689,7 @@ public class MyView extends View {
         }
         return result;
     }
-
+*/
     //***********************************************************
     //Affine transformation
     public Coordinate[] translate(Coordinate[] vertices, double tx, double ty, double tz) {
@@ -693,7 +697,7 @@ public class MyView extends View {
         matrix[3] = tx;
         matrix[7] = ty;
         matrix[11] = tz;
-        return Transformation(vertices, matrix);
+        return matrices3D.Transformation(vertices, matrix);
     }
 
     private Coordinate[] scale(Coordinate[] vertices, double sx, double sy, double sz) {
@@ -701,7 +705,7 @@ public class MyView extends View {
         matrix[0] = sx;
         matrix[5] = sy;
         matrix[10] = sz;
-        return Transformation(vertices, matrix);
+        return matrices3D.Transformation(vertices, matrix);
     }
 
 }
