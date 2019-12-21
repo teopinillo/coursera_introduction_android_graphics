@@ -12,6 +12,8 @@ import android.graphics.Shader;
 import android.util.Log;
 import android.view.View;
 
+import com.bennyplo.graphics3d.Coordinate;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -33,14 +35,32 @@ public class MyView extends View {
 
     private LinearGradient linearGradient;
 
+    private Coordinate[] cube_vertices;//the vertices of a 3D cube
+    private Coordinate[] draw_cube_vertices;//the vertices for drawing a 3D cube
+
     private float[] triangle = {100, 100, 200, 200, 200, 200, 100, 200, 100, 200, 100, 100};
 
     public MyView(Context context) {
         super(context, null);
         //Add your initialisation code here
         initPaints();
+        create3dCubes();
     }
 
+    void create3dCubes() {
+        //create a 3D cube
+        cube_vertices = new Coordinate[8];
+        cube_vertices[0] = new Coordinate(-1, -1, -1, 1);
+        cube_vertices[1] = new Coordinate(-1, -1, 1, 1);
+        cube_vertices[2] = new Coordinate(-1, 1, -1, 1);
+        cube_vertices[3] = new Coordinate(-1, 1, 1, 1);
+        cube_vertices[4] = new Coordinate(1, -1, -1, 1);
+        cube_vertices[5] = new Coordinate(1, -1, 1, 1);
+        cube_vertices[6] = new Coordinate(1, 1, -1, 1);
+        cube_vertices[7] = new Coordinate(1, 1, 1, 1);
+        draw_cube_vertices = translate(cube_vertices, 2, 2, 2);
+        draw_cube_vertices = scale(draw_cube_vertices, 40, 40, 40);
+    }
     void initGradients(int x0, int y0, int xl, int yl, Shader.TileMode tileMode) {
         linearGradient = new LinearGradient(x0, y0, xl, yl, Color.BLUE, Color.RED, tileMode);
         gradientPaint = new Paint();
@@ -53,7 +73,7 @@ public class MyView extends View {
         redPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         redPaint.setStyle(Paint.Style.STROKE);//stroke only no fill
         redPaint.setColor(0xffff0000);//color red
-        redPaint.setStrokeWidth(5);//set the line stroke width to 5
+        redPaint.setStrokeWidth(2);//set the line stroke width to 5
 
         bluePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bluePaint.setStyle(Paint.Style.STROKE);
@@ -94,7 +114,7 @@ public class MyView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        //drawPolyine2(canvas);
+        //drawPolyline2(canvas);
         //drawPolylineObjectTask(canvas);
         //drawPolyline_1(canvas, Shader.TileMode.CLAMP);
         //drawPolyline_2(canvas, Shader.TileMode.MIRROR);
@@ -109,7 +129,7 @@ public class MyView extends View {
          For example, these functions allow us to move or rotate a 2D object.
          To convert a vector to homogeneous coordinates, we simply increase the
          dimension of a 2D vector to 3, and assigned the value 1 to the new dimension.Start
-         By using homogeneous coordinates, we can perform translation, rotation, scaling, and shear.
+         By using homogeneous coordinates, we can perform translation, rotation, scale, and shear.
          By simply multiplying the homogeneous coordinates with a 3 by 3 transformation matrix.
          */
         //affineTransformationDemo(canvas);
@@ -135,6 +155,7 @@ public class MyView extends View {
 
         //+++++ WEEK 2 ++++++++++++++
         //
+        DrawCube(canvas);
     }
 
     void firstLesson(Canvas canvas) {
@@ -162,7 +183,7 @@ public class MyView extends View {
         canvas.drawCircle(600, 600, 145, bluePaint);
     }
 
-    void drawPolyine(Canvas canvas) {
+    void drawPolyline(Canvas canvas) {
         int[] x = {20, 60, 80, 140, 250};
         int[] y = {220, 360, 300, 400, 160};
         Path myLines = new Path();
@@ -175,7 +196,7 @@ public class MyView extends View {
         canvas.drawPath(myLines, blackPaint);
     }
 
-    void drawPolyine2(Canvas canvas) {
+    void drawPolyline2(Canvas canvas) {
         int[] x = {20, 60, 80, 140, 250};
         int[] y = {220, 360, 300, 400, 160};
         Path myLines = new Path();
@@ -309,7 +330,7 @@ public class MyView extends View {
         canvas.drawPath(object, greenPaint);
 
         //do Scaling
-        newPoints = scaling(points, 1.5, 1.5);
+        newPoints = scale(points, 1.5, 1.5);
         object = createPath(newPoints);
         canvas.drawPath(object, redPaint);
 
@@ -389,7 +410,7 @@ public class MyView extends View {
         return affineTransformation(input, matrix);
     }
 
-    Point[] scaling(Point[] input, double xf, double yf) {
+    Point[] scale(Point[] input, double xf, double yf) {
         double[][] matrix = new double[3][3];
         matrix[0][0] = xf;
         matrix[0][1] = 0;
@@ -436,7 +457,7 @@ public class MyView extends View {
         points[4] = new Point(300, 200);
 
         newPoints = shear(points, 2, 0);
-        newPoints = scaling(newPoints, 0.5, 0.5);
+        newPoints = scale(newPoints, 0.5, 0.5);
         newPoints = rotation(newPoints, 45);
         newPoints = translate(newPoints, 550, 0);
         object = createPath(newPoints);
@@ -510,7 +531,7 @@ public class MyView extends View {
         ptarray = translate(ptarray, 0, -minvalue);
         double yscale = viewheight / (double) (maxvalue - minvalue);
         double xscale = viewwidth / (double) (plotData.length - 1);
-        ptarray = scaling(ptarray, xscale, yscale);
+        ptarray = scale(ptarray, xscale, yscale);
         Path result = new Path();
         result.moveTo(ptarray[0].x, ptarray[0].y);
         for (int i = 1; i < ptarray.length; i++) {
@@ -593,6 +614,95 @@ public class MyView extends View {
 
     }
 
+
+    //+++++++++++++++METHODS ADDED ON WEEK 2 ++++++++++++++++++++++++++
+    private void DrawLinePairs(Canvas canvas, Coordinate[] vertices, int start, int end, Paint paint) {//draw a line connecting 2 points
+        //canvas - canvas of the view
+        //points - array of points
+        //start - index of the starting point
+        //end - index of the ending point
+        //paint - the paint of the line
+        canvas.drawLine((int) vertices[start].x, (int) vertices[start].y, (int) vertices[end].x, (int) vertices[end].y, paint);
+    }
+
+    private void DrawCube(Canvas canvas) {//draw a cube on the screen
+        DrawLinePairs(canvas, draw_cube_vertices, 0, 1, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 1, 3, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 3, 2, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 2, 0, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 4, 5, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 5, 7, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 7, 6, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 6, 4, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 0, 4, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 1, 5, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 2, 6, redPaint);
+        DrawLinePairs(canvas, draw_cube_vertices, 3, 7, redPaint);
+    }
+
+    //*********************************
+    //matrix and transformation functions
+    public double[] GetIdentityMatrix() {//return an 4x4 identity matrix
+        double[] matrix = new double[16];
+        matrix[0] = 1;
+        matrix[1] = 0;
+        matrix[2] = 0;
+        matrix[3] = 0;
+        matrix[4] = 0;
+        matrix[5] = 1;
+        matrix[6] = 0;
+        matrix[7] = 0;
+        matrix[8] = 0;
+        matrix[9] = 0;
+        matrix[10] = 1;
+        matrix[11] = 0;
+        matrix[12] = 0;
+        matrix[13] = 0;
+        matrix[14] = 0;
+        matrix[15] = 1;
+        return matrix;
+    }
+
+    public Coordinate Transformation(Coordinate vertex, double[] matrix) {//affine transformation with homogeneous coordinates
+        //i.e. a vector (vertex) multiply with the transformation matrix
+        // vertex - vector in 3D
+        // matrix - transformation matrix
+        Coordinate result = new Coordinate();
+        result.x = matrix[0] * vertex.x + matrix[1] * vertex.y + matrix[2] * vertex.z + matrix[3];
+        result.y = matrix[4] * vertex.x + matrix[5] * vertex.y + matrix[6] * vertex.z + matrix[7];
+        result.z = matrix[8] * vertex.x + matrix[9] * vertex.y + matrix[10] * vertex.z + matrix[11];
+        result.w = matrix[12] * vertex.x + matrix[13] * vertex.y + matrix[14] * vertex.z + matrix[15];
+        return result;
+    }
+
+    public Coordinate[] Transformation(Coordinate[] vertices, double[] matrix) {   //Affine transform a 3D object with vertices
+        // vertices - vertices of the 3D object.
+        // matrix - transformation matrix
+        Coordinate[] result = new Coordinate[vertices.length];
+        for (int i = 0; i < vertices.length; i++) {
+            result[i] = Transformation(vertices[i], matrix);
+            result[i].Normalise();
+        }
+        return result;
+    }
+
+    //***********************************************************
+    //Affine transformation
+    public Coordinate[] translate(Coordinate[] vertices, double tx, double ty, double tz) {
+        double[] matrix = GetIdentityMatrix();
+        matrix[3] = tx;
+        matrix[7] = ty;
+        matrix[11] = tz;
+        return Transformation(vertices, matrix);
+    }
+
+    private Coordinate[] scale(Coordinate[] vertices, double sx, double sy, double sz) {
+        double[] matrix = GetIdentityMatrix();
+        matrix[0] = sx;
+        matrix[5] = sy;
+        matrix[10] = sz;
+        return Transformation(vertices, matrix);
+    }
 
 }
 
