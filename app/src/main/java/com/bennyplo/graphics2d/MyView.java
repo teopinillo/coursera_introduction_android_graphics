@@ -13,7 +13,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.bennyplo.graphics3d.Coordinate;
-import com.bennyplo.graphics3d.Matrices3D;
+import com.bennyplo.graphics3d.Transformation3D;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -41,7 +41,7 @@ public class MyView extends View {
 
     private float[] triangle = {100, 100, 200, 200, 200, 200, 100, 200, 100, 200, 100, 100};
 
-    private Matrices3D matrices3D = new Matrices3D();
+    private Transformation3D transformation3D = new Transformation3D();
 
     public MyView(Context context) {
         super(context, null);
@@ -61,8 +61,10 @@ public class MyView extends View {
         cube_vertices[5] = new Coordinate(1, -1, 1, 1);
         cube_vertices[6] = new Coordinate(1, 1, -1, 1);
         cube_vertices[7] = new Coordinate(1, 1, 1, 1);
-        draw_cube_vertices = translate(cube_vertices, 2, 2, 2);
-        draw_cube_vertices = scale(draw_cube_vertices, 40, 40, 40);
+        draw_cube_vertices = transformation3D.translate3D(cube_vertices, 2, 2, 2);
+        draw_cube_vertices = transformation3D.scale3D(draw_cube_vertices, 40, 40, 40);
+        draw_cube_vertices = transformation3D.rotate3D_Y_Axis(draw_cube_vertices, 45);
+        draw_cube_vertices = transformation3D.rotate3D_X_Axis(draw_cube_vertices, 45);
     }
     void initGradients(int x0, int y0, int xl, int yl, Shader.TileMode tileMode) {
         linearGradient = new LinearGradient(x0, y0, xl, yl, Color.BLUE, Color.RED, tileMode);
@@ -643,70 +645,6 @@ public class MyView extends View {
         DrawLinePairs(canvas, draw_cube_vertices, 3, 7, redPaint);
     }
 
-    //*********************************
-    //matrix and transformation functions
-    public double[] GetIdentityMatrix() {//return an 4x4 identity matrix
-        double[] matrix = new double[16];
-        matrix[0] = 1;
-        matrix[1] = 0;
-        matrix[2] = 0;
-        matrix[3] = 0;
-        matrix[4] = 0;
-        matrix[5] = 1;
-        matrix[6] = 0;
-        matrix[7] = 0;
-        matrix[8] = 0;
-        matrix[9] = 0;
-        matrix[10] = 1;
-        matrix[11] = 0;
-        matrix[12] = 0;
-        matrix[13] = 0;
-        matrix[14] = 0;
-        matrix[15] = 1;
-        return matrix;
-    }
-
-    /*
-    public Coordinate Transformation(Coordinate vertex, double[] matrix) {//affine transformation with homogeneous coordinates
-        //i.e. a vector (vertex) multiply with the transformation matrix
-        // vertex - vector in 3D
-        // matrix - transformation matrix
-        Coordinate result = new Coordinate();
-        result.x = matrix[0] * vertex.x + matrix[1] * vertex.y + matrix[2] * vertex.z + matrix[3];
-        result.y = matrix[4] * vertex.x + matrix[5] * vertex.y + matrix[6] * vertex.z + matrix[7];
-        result.z = matrix[8] * vertex.x + matrix[9] * vertex.y + matrix[10] * vertex.z + matrix[11];
-        result.w = matrix[12] * vertex.x + matrix[13] * vertex.y + matrix[14] * vertex.z + matrix[15];
-        return result;
-    }
-
-    public Coordinate[] Transformation(Coordinate[] vertices, double[] matrix) {   //Affine transform a 3D object with vertices
-        // vertices - vertices of the 3D object.
-        // matrix - transformation matrix
-        Coordinate[] result = new Coordinate[vertices.length];
-        for (int i = 0; i < vertices.length; i++) {
-            result[i] = Transformation(vertices[i], matrix);
-            result[i].Normalise();
-        }
-        return result;
-    }
-*/
-    //***********************************************************
-    //Affine transformation
-    public Coordinate[] translate(Coordinate[] vertices, double tx, double ty, double tz) {
-        double[] matrix = GetIdentityMatrix();
-        matrix[3] = tx;
-        matrix[7] = ty;
-        matrix[11] = tz;
-        return matrices3D.Transformation(vertices, matrix);
-    }
-
-    private Coordinate[] scale(Coordinate[] vertices, double sx, double sy, double sz) {
-        double[] matrix = GetIdentityMatrix();
-        matrix[0] = sx;
-        matrix[5] = sy;
-        matrix[10] = sz;
-        return matrices3D.Transformation(vertices, matrix);
-    }
 
 }
 
