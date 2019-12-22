@@ -61,10 +61,24 @@ public class MyView extends View {
         cube_vertices[5] = new Coordinate(1, -1, 1, 1);
         cube_vertices[6] = new Coordinate(1, 1, -1, 1);
         cube_vertices[7] = new Coordinate(1, 1, 1, 1);
-        draw_cube_vertices = transformation3D.translate3D(cube_vertices, 2, 2, 2);
+        draw_cube_vertices = transformation3D.translate3D(cube_vertices, 10, -7, 3);
         draw_cube_vertices = transformation3D.scale3D(draw_cube_vertices, 40, 40, 40);
-        draw_cube_vertices = transformation3D.rotate3D_Y_Axis(draw_cube_vertices, 45);
-        draw_cube_vertices = transformation3D.rotate3D_X_Axis(draw_cube_vertices, 45);
+
+
+        //Quizz Transfomration 45 grades by Y and 45 grades by X
+        //draw_cube_vertices = transformation3D.rotate3D_Y_Axis(draw_cube_vertices, 45);
+        //draw_cube_vertices = transformation3D.rotate3D_X_Axis(draw_cube_vertices, 45);
+        //see image: quiz_3d_affine_transformation_45y45x
+
+        //3D affine transformation
+        //
+        //Quiz
+        //
+        //Using the example program, rotate the 3D cube 80 degrees about the z-axis and
+        // then 30 degrees about the y-axis, what will the output look like?
+        draw_cube_vertices = transformation3D.rotate3D_Z_Axis(draw_cube_vertices, 80);
+        draw_cube_vertices = transformation3D.rotate3D_Y_Axis(draw_cube_vertices, 30);
+
     }
     void initGradients(int x0, int y0, int xl, int yl, Shader.TileMode tileMode) {
         linearGradient = new LinearGradient(x0, y0, xl, yl, Color.BLUE, Color.RED, tileMode);
